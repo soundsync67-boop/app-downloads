@@ -30,7 +30,7 @@ async function session(target){
   const readable=await compiler(`(async()=>{const v=document.createElement('video');v.src=${JSON.stringify(url)};await new Promise((r,j)=>{v.onloadedmetadata=r;v.onerror=()=>j(Error('Video URI failed'));});return v.videoWidth;})()`);assert.equal(readable,180);
   await shell('window.studio.setRenderPause(0)');
   const output=path.join(base,'render-test.mp4');
-  const result=await compiler(`window.triplemix.renderVideo({jobId:'native-windows-test',groups:[{files:[${JSON.stringify(sample)},${JSON.stringify(sample)},${JSON.stringify(sample)}]}],outputPath:${JSON.stringify(output)},quality:720,fps:30,bitrate:4,voiceEffect:'original',comfortAudio:false})`);
+  const result=await compiler(`window.triplemix.renderVideo({jobId:'native-windows-test',groups:[{files:[${JSON.stringify(sample)},${JSON.stringify(sample)},${JSON.stringify(sample)}]}],outputPath:${JSON.stringify(output)},settings:{quality:720,fps:30,bitrate:4,voiceEffect:'original',comfortAudio:false,hue:0,saturation:0}})`);
   assert(result.ok,JSON.stringify(result));assert(fs.statSync(output).size>1000);
   const probe=cp.spawnSync(path.join(base,'resources/media-tools/ffprobe.exe'),['-v','error','-show_entries','stream=codec_type','-of','json',output],{encoding:'utf8'});assert.equal(probe.status,0,probe.stderr);const streams=JSON.parse(probe.stdout).streams;assert(streams.some(s=>s.codec_type==='video'));assert(streams.some(s=>s.codec_type==='audio'));
   await until(()=>compiler('!!document.querySelector(".queue-thumbnail img")?.naturalWidth'),'Windows queue image');
